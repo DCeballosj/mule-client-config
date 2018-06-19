@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+						http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+						http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+						http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+						http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    
+    <spring:beans>
+    	<spring:bean id="appCtxProv" class="org.kkssrc.mule.cloud.config.client.ApplicationContextProvider"/>
+        <spring:bean id="clientProperties" name="Bean" class="org.springframework.cloud.config.client.ConfigClientProperties">
+            <spring:property name="name" value="mule-flow-configuration-testing"/>
+            <spring:property name="profile" value="default"/>
+            <spring:property name="label" value="develop"/>
+            <spring:property name="uri" value="http://localhost:8980"/>
+        </spring:bean>
+        <spring:bean id="muleCloudProperties" class="org.kkssrc.mule.cloud.config.client.MuleCloudConfigProperties" name="Bean2">
+            <spring:constructor-arg ref="clientProperties"/>
+            <spring:constructor-arg ref="appCtxProv"/>
+        </spring:bean>
+    </spring:beans>
+
+	<context:property-placeholder properties-ref="muleCloudProperties" />
+	
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="${http.listen.port}" doc:name="HTTP Listener Configuration"/>
+    <flow name="mule-config-testFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/mule-flow-config-test" doc:name="HTTP" allowedMethods="GET"/>
+        <set-payload value="${nterra.message}" doc:name="Set Payload"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
